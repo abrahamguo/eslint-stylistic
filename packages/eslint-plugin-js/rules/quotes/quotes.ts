@@ -287,8 +287,30 @@ export default createRule<MessageIds, RuleOptions>({
             || isJSXLiteral(node)
             || isSurroundedBy(rawVal, settings.quote)
 
-          if (!isValid && avoidEscape)
-            isValid = isSurroundedBy(rawVal, settings.alternateQuote) && rawVal.includes(settings.quote)
+          if (!isValid && avoidEscape) {
+            // eslint-disable-next-line no-console
+            console.log(
+              settings.quote,
+              rawVal,
+              [
+                ...new Set(
+                  [settings.quote, settings.alternateQuote, ...Object.values(QUOTE_SETTINGS).map(({ quote }) => quote)],
+                ),
+              ]
+                .map(quote => ({ quote, count: rawVal.match(new RegExp(quote, `g`))?.length ?? 0 }))
+                .sort((a, b) => a.count - b.count)[0].quote,
+            )
+            isValid = isSurroundedBy(
+              rawVal,
+              [
+                ...new Set(
+                  [settings.quote, settings.alternateQuote, ...Object.values(QUOTE_SETTINGS).map(({ quote }) => quote)],
+                ),
+              ]
+                .map(quote => ({ quote, count: rawVal.match(new RegExp(quote, `g`))?.length ?? 0 }))
+                .sort((a, b) => a.count - b.count)[0].quote,
+            )
+          }
 
           if (!isValid) {
             context.report({
